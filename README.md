@@ -238,8 +238,8 @@ Open [http://localhost:3000](http://localhost:3000) in your browser. Register an
 ├── lib/
 │   └── db.ts                # Prisma database client singleton
 ├── prisma/
-│   └── schema.prisma        # Database schema models
-└── screenshots/             # Store your screenshots here
+    └── schema.prisma        # Database schema models
+
 ```
 
 ---
