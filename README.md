@@ -10,7 +10,14 @@ A full-featured document management and collaboration platform built with Next.j
   Take a screenshot of your main "My Files" screen (http://localhost:3000/dashboard/files)
   showing the document list, status pills, filter bar, and "New Document" button.
 -->
-![DocFlow Dashboard Overview](screenshots/dashboard.png)
+<img width="1917" height="907" alt="image" src="https://github.com/user-attachments/assets/fb9039c5-0d45-4188-b2d3-cf693407fe3c" />
+</>
+</>
+</>
+</>
+<img width="1917" height="905" alt="image" src="https://github.com/user-attachments/assets/cb675563-745d-4059-b46e-35fd3b19b9f7" />
+
+
 
 ---
 
@@ -31,7 +38,11 @@ DocFlow is designed around how teams actually work with documents—balancing qu
   Open any native document (http://localhost:3000/dashboard/files/[id]) and take a screenshot
   showing the rich-text editing canvas, formatting toolbar, and the top actions (Save, Lock, Export).
 -->
-![Native Document Editor](screenshots/editor.png)
+<img width="1917" height="902" alt="image" src="https://github.com/user-attachments/assets/ebb37e32-8b1b-4d01-b538-9ecf44e9b7da" />
+</>
+
+<img width="1917" height="910" alt="image" src="https://github.com/user-attachments/assets/bd65f877-2ac8-4b25-994c-91b1a42a167e" />
+
 
 ---
 
@@ -53,7 +64,11 @@ DocFlow is designed around how teams actually work with documents—balancing qu
   Scroll to the version history or audit sidebar in the document view showing
   past versions, timestamps, and user actions.
 -->
-![Version History and Audit Log](screenshots/version-history.png)
+<img width="1913" height="907" alt="image" src="https://github.com/user-attachments/assets/b1c2cd27-31ff-44da-b2b1-758a54e7bcd2" />
+</>
+
+<img width="1917" height="900" alt="image" src="https://github.com/user-attachments/assets/98f155e8-d982-438d-8f2e-63cafe45b783" />
+
 
 ---
 
@@ -78,7 +93,10 @@ DocFlow is designed around how teams actually work with documents—balancing qu
   Click the "Share" button on any document row in the table or within the project view
   and take a screenshot of the popup dialog showing email input and permission selector.
 -->
-![Sharing and Permissions Dialog](screenshots/share-modal.png)
+<img width="917" height="696" alt="image" src="https://github.com/user-attachments/assets/909a603c-3d4a-45af-ba4a-7efc4290014e" />
+</>
+<img width="1000" height="662" alt="image" src="https://github.com/user-attachments/assets/b72e62e6-924b-4b11-971e-38f55639a316" />
+
 
 ---
 
@@ -96,7 +114,13 @@ DocFlow is designed around how teams actually work with documents—balancing qu
   Navigate to "Pending Approval" in the sidebar (http://localhost:3000/dashboard/approvals)
   and screenshot the review queue with document review cards and action buttons.
 -->
-![Review and Approval Workflow](screenshots/approval-flow.png)
+<img width="1912" height="901" alt="image" src="https://github.com/user-attachments/assets/7e83b835-418a-4eee-b9f6-cae8741afe1e" />
+</>
+<img width="1911" height="906" alt="image" src="https://github.com/user-attachments/assets/4c990606-cf92-48cd-8b3b-82f9aba5a71e" />
+</>
+For User B now it is showing Pending Review
+</>
+<img width="1917" height="907" alt="image" src="https://github.com/user-attachments/assets/08048611-c897-4858-881f-5f4bc0ef16ea" />
 
 ---
 
@@ -219,19 +243,4 @@ Open [http://localhost:3000](http://localhost:3000) in your browser. Register an
 ```
 
 ---
-
-## Adding Your Screenshots
-
-To make the README visual, create a `screenshots/` directory in the project root and add the following image files:
-
-| File Name | Where to Take It | What to Show |
-| :--- | :--- | :--- |
-| `screenshots/dashboard.png` | `/dashboard/files` | Main document table with search bar, action buttons, and status tags |
-| `screenshots/editor.png` | `/dashboard/files/[id]` | The TipTap rich-text editor with content, formatting toolbar, and export dropdown |
-| `screenshots/version-history.png` | `/dashboard/files/[id]` | Version list showing check-in revisions, dates, and audit log history |
-| `screenshots/share-modal.png` | `/dashboard/files` | The "Share Document" popup showing user email input, permission selector, and download toggle |
-| `screenshots/approval-flow.png` | `/dashboard/approvals` | Review queue with pending documents, author details, and approve/request changes buttons |
-
----
-
 
