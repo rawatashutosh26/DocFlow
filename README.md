@@ -50,6 +50,10 @@ DocFlow is designed around how teams actually work with documents—balancing qu
 * Prevents two people from overwriting each other's edits.
 * When you want to edit a document, **check it out** to lock it under your name. Other team members can see who locked the file and when.
 * When you are done, **check it in** with an optional change summary. This unlocks the file and automatically increments the version counter.
+---
+<img width="1911" height="908" alt="image" src="https://github.com/user-attachments/assets/396ca239-988e-4247-9f9d-d3938c2db827" />
+
+---
 
 ### 3. Version History & Audit Trail
 * Every check-in snapshots the document into an immutable version record.
@@ -76,6 +80,13 @@ DocFlow is designed around how teams actually work with documents—balancing qu
 * Group related documents into **Project Workspaces** and nested folders.
 * Create teams (e.g., Engineering, Marketing, Legal) and attach projects directly to teams.
 * Projects can be public to the team or locked down so only approved team members can open them.
+
+---
+
+<img width="1915" height="912" alt="image" src="https://github.com/user-attachments/assets/2fcef33b-6111-47bf-a420-d01767ca2b27" />
+
+
+---
 
 ### 5. Granular Sharing & Access Control
 * **Document-Level Sharing**: Share any individual document with a colleague via email.
