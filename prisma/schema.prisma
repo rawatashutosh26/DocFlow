@@ -1,0 +1,307 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Account {
+  id                String  @id @default(uuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id                     String            @id @default(uuid())
+  name                   String?
+  email                  String?           @unique
+  emailVerified          DateTime?
+  image                  String?
+  password               String?
+  role                   Role              @default(USER)
+  lockedDocuments        Document[]        @relation("DocumentLocks")
+  accounts               Account[]
+  sessions               Session[]
+  documents              Document[]
+  folders                Folder[]
+  sharedAccess           DocumentAccess[]
+  auditLogs              AuditLog[]
+  documentVersions       DocumentVersion[]
+  stars                  Star[]
+  teamMemberships        TeamMembership[]
+  folderAccess           FolderAccess[]
+  accessRequestsSent     AccessRequest[]   @relation("AccessRequestsSent")
+  accessRequestsReceived AccessRequest[]   @relation("AccessRequestsReceived")
+  createdAt              DateTime          @default(now())
+}
+
+model Folder {
+  id          String  @id @default(uuid())
+  name        String
+  description String? @db.Text
+
+  parentId String?
+  parent   Folder?  @relation("FolderHierarchy", fields: [parentId], references: [id])
+  children Folder[] @relation("FolderHierarchy")
+
+  documents Document[]
+  ownerId   String
+  owner     User       @relation(fields: [ownerId], references: [id])
+
+  // If set, this project belongs to a team. Team members always have
+  // access; a locked project additionally blocks everyone else until
+  // they're granted access via FolderAccess (see AccessRequest below).
+  teamId   String?
+  team     Team?   @relation(fields: [teamId], references: [id])
+  isLocked Boolean @default(false)
+
+  grantedAccess  FolderAccess[]
+  // Supplemental team shares — separate from `team` above, which denotes the
+  // single "owning" team. A project can additionally be shared (like a
+  // Google-Drive-style "Share" action) with any number of other teams
+  // without transferring ownership.
+  teamAccess     FolderTeamAccess[]
+  accessRequests AccessRequest[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Team {
+  id          String  @id @default(uuid())
+  name        String
+  description String? @db.Text
+
+  members TeamMembership[]
+  folders Folder[]
+  folderShares FolderTeamAccess[]
+
+  createdAt DateTime @default(now())
+}
+
+model TeamMembership {
+  id     String   @id @default(uuid())
+  teamId String
+  team   Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  userId String
+  user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role   TeamRole @default(MEMBER)
+
+  createdAt DateTime @default(now())
+
+  @@unique([teamId, userId])
+}
+
+// Mirrors DocumentAccess, but for an entire project/folder — granted either
+// directly by the owner or by approving an AccessRequest.
+model FolderAccess {
+  id       String @id @default(uuid())
+  folderId String
+  userId   String
+
+  accessLevel AccessLevel @default(VIEWER)
+
+  folder Folder @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([folderId, userId])
+}
+
+// Sharing a project with an entire team, without making that team the
+// project's owner (see Folder.teamId for ownership). Every member of the
+// team gets `accessLevel` access to the project and everything inside it.
+model FolderTeamAccess {
+  id       String @id @default(uuid())
+  folderId String
+  teamId   String
+
+  accessLevel AccessLevel @default(VIEWER)
+
+  folder Folder @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  team   Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([folderId, teamId])
+}
+
+model Document {
+  id          String  @id @default(uuid())
+  title       String
+  description String? @db.Text
+
+  // Dual-mode editing fields
+  type       DocumentType   @default(UPLOADED)
+  filePath   String? // Optional: Only used if type is UPLOADED
+  content    String?        @db.Text // Optional: Only used if type is NATIVE
+  auditLogs  AuditLog[]
+  size       Int
+  mimeType   String
+  version    Int            @default(1)
+  isLocked   Boolean        @default(false)
+  lockedById String?
+  lockedBy   User?          @relation("DocumentLocks", fields: [lockedById], references: [id])
+  status     DocumentStatus @default(DRAFT)
+
+  folderId String?
+  folder   Folder? @relation(fields: [folderId], references: [id])
+  ownerId  String
+  owner    User    @relation(fields: [ownerId], references: [id])
+
+  // The new sharing engine
+  sharedAccess DocumentAccess[]
+
+  versions       DocumentVersion[]
+  stars          Star[]
+  accessRequests AccessRequest[]
+  deletedAt      DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model DocumentAccess {
+  id         String @id @default(uuid())
+  documentId String
+  userId     String
+
+  accessLevel AccessLevel @default(VIEWER)
+  canDownload Boolean     @default(false)
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Ensures a user can only have one specific permission rule per document
+  @@unique([documentId, userId])
+}
+
+// A request from one user to gain access to something they found via
+// search but don't yet have permission for — either a single Document or
+// an entire Folder/Project. Exactly one of documentId/folderId is set.
+model AccessRequest {
+  id String @id @default(uuid())
+
+  requesterId String
+  requester   User   @relation("AccessRequestsSent", fields: [requesterId], references: [id], onDelete: Cascade)
+
+  // Denormalized so the owner's inbox query doesn't need to join through
+  // Document/Folder just to filter "requests I need to act on".
+  ownerId String
+  owner   User   @relation("AccessRequestsReceived", fields: [ownerId], references: [id], onDelete: Cascade)
+
+  documentId String?
+  document   Document? @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  folderId String?
+  folder   Folder? @relation(fields: [folderId], references: [id], onDelete: Cascade)
+
+  requestedLevel AccessLevel   @default(VIEWER)
+  message        String?       @db.Text
+  status         RequestStatus @default(PENDING)
+
+  createdAt  DateTime  @default(now())
+  resolvedAt DateTime?
+}
+
+enum RequestStatus {
+  PENDING
+  APPROVED
+  DENIED
+}
+
+enum TeamRole {
+  LEAD
+  MEMBER
+}
+
+enum DocumentStatus {
+  DRAFT
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum AccessLevel {
+  VIEWER
+  EDITOR
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum DocumentType {
+  UPLOADED
+  NATIVE
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  action    String // e.g., "CREATED", "EDITED", "SHARED", "DOWNLOADED"
+  details   String? // Extra info (e.g., "Shared with ashutosh@example.com")
+  createdAt DateTime @default(now())
+
+  // Relations
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  documentId String? // Optional: Allows us to track general actions or document-specific actions
+  document   Document? @relation(fields: [documentId], references: [id], onDelete: SetNull)
+}
+
+model DocumentVersion {
+  id      String @id @default(uuid())
+  version Int
+
+  filePath String?
+  content  String? @db.Text
+  size     Int?
+  mimeType String?
+
+  documentId String
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  createdById String
+  createdBy   User   @relation(fields: [createdById], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([documentId])
+}
+
+model Star {
+  id String @id @default(uuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  documentId String
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, documentId])
+}
